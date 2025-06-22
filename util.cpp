@@ -73,7 +73,10 @@ static void vlog(const char* tpl_p, va_list ap)
     while ((ch = pgm_read_byte(tpl_p)) != 0) {
         if (is_escape)
         {
-            if (ch == 'd') {
+            if (ch == 'l') {
+                Serial.print(va_arg(ap, long));
+                ++tpl_p; // skip d
+            } else if (ch == 'd') {
                 Serial.print(va_arg(ap, int));
             } else if (ch == 's') {
                 write_P(va_arg(ap, const char*), UINT8_MAX);

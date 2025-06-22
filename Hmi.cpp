@@ -92,6 +92,8 @@ void Hmi::set_error(hmi_error_e error, bool is_error_active)
     } else {
         _active_errors &= ~mask;
     }
+
+    if (_active_errors == 0) log("hmi: all ok");
 }
 
 void Hmi::set_state(State state)
@@ -121,7 +123,7 @@ void Hmi::set_state(State state)
             break;
     }
 
-    log("hmi: entered state %s", s_state_names[state]);
+    //log("hmi: entered state %s", s_state_names[state]);
 }
 
 void Hmi::set_led(bool is_on)
@@ -132,14 +134,14 @@ void Hmi::set_led(bool is_on)
 bool Hmi::select_error_to_show()
 {
     uint8_t org = _error_idx;
-    if (_active_errors == 0) return true;
+    if (!_active_errors) return false;
 
     do {
         if (++_error_idx >= NUMBER_OF_ERRORS) _error_idx = 0;
         unsigned mask = 1u << _error_idx;
 
         if (mask & _active_errors) {
-            log("hmi: show error: %s", s_error_names[_error_idx]);
+            //log("hmi: show error: %s", s_error_names[_error_idx]);
             _blinks_remaining = s_blink_count[_error_idx];
             return true;
         }

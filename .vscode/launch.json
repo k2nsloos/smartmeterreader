@@ -9,7 +9,7 @@
             "name": "Cortex Debug",
             "cwd": "${workspaceFolder}",
             "executable": "output/smartmeterreader.ino.elf",
-            "request": "launch",
+            "request": "attach",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
             "servertype": "openocd",
