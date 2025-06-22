@@ -1,0 +1,25 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build smartmeterreader ESP32",
+            "type": "shell",
+            "command": "arduino-cli compile --optimize-for-debug --output-dir output -b esp32:esp32:XIAO_ESP32C6 .",
+            "problemMatcher": []
+        },
+        {
+            "label": "Upload",
+            "type": "shell",
+            "command": "arduino-cli upload -p /dev/ttyACM0 --fqbn esp32:esp32:XIAO_ESP32C6 .",
+            "problemMatcher": []
+        },
+        {
+            "label": "Upload (alt)",
+            "type": "shell",
+            "command": "arduino-cli upload -p /dev/ttyUSB0 --fqbn arduino:avr:uno .",
+            "problemMatcher": []
+        }
+    ]
+}

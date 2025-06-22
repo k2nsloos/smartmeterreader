@@ -1,0 +1,40 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/jaap-hollander/.arduino15/packages/esp32/hardware/esp32/3.2.0/cores/esp32",
+                "/home/jaap-hollander/.arduino15/packages/esp32/hardware/esp32/3.2.0/variants/XIAO_ESP32C6",
+                "/home/jaap-hollander/.arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-2f7dcd86-v1/esp32c6/qio_qspi/include",
+                "/home/jaap-hollander/.arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-2f7dcd86-v1/esp32c6/include/esp_rom/esp32c6/include/esp32c6",
+                "/home/jaap-hollander/.arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-2f7dcd86-v1/esp32c6/include/soc/esp32c6/register",
+                "/home/jaap-hollander/.arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-2f7dcd86-v1/esp32c6/include/newlib/platform_include",
+                "/home/jaap-hollander/.arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-2f7dcd86-v1/esp32c6/include/**/include",
+                "/home/jaap-hollander/.arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-2f7dcd86-v1/esp32c6/include/freertos/FreeRTOS-Kernel/portable/riscv/include/freertos",
+                "/home/jaap-hollander/.arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-2f7dcd86-v1/esp32c6/include/freertos/config/include/freertos",
+                "/home/jaap-hollander/Arduino/libraries/WiFi/src"
+            ],
+            "defines": [
+                "F_CPU=160000000L",
+                "ARDUINO=10607",
+                "ARDUINO_XIAO_ESP32C6",
+                "ARDUINO_ARCH_ESP32",
+                "ARDUINO_BOARD=\"XIAO_ESP32C6\"",
+                "ARDUINO_VARIANT=\"XIAO_ESP32C6\"",
+                "ARDUINO_PARTITION_default",
+                "ARDUINO_HOST_OS=\"linux\"",
+                "ARDUINO_FQBN=\"esp32:esp32:XIAO_ESP32C6\"",
+                "ESP32=ESP32",
+                "CORE_DEBUG_LEVEL=0",
+                "ARDUINO_USB_MODE=1",
+                "ARDUINO_USB_CDC_ON_BOOT=1"
+            ],
+            "compilerPath": "/home/jaap-hollander/.arduino15/packages/esp32/tools/esp-rv32/2411/bin/riscv32-esp-elf-g++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm"
+        }
+    ],
+    "version": 4
+}
