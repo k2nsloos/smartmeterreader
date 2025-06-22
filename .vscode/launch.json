@@ -8,11 +8,14 @@
         {
             "name": "Cortex Debug",
             "cwd": "${workspaceFolder}",
-            "executable": "./bin/executable.elf",
+            "executable": "output/smartmeterreader.ino.elf",
             "request": "launch",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
-            "servertype": "jlink"
+            "servertype": "openocd",
+            "serverpath": "/home/jaap-hollander/.arduino15/packages/esp32/tools/openocd-esp32/v0.12.0-esp32-20241016/bin/openocd",
+            "gdbPath": "/home/jaap-hollander/.arduino15/packages/esp32/tools/riscv32-esp-elf-gdb/14.2_20240403/bin/riscv32-esp-elf-gdb",
+            "configFiles": ["/home/jaap-hollander/.arduino15/packages/esp32/tools/openocd-esp32/v0.12.0-esp32-20241016/share/openocd/scripts/board/esp32c6-builtin.cfg"]
         }
     ]
 }

@@ -6,19 +6,19 @@
         {
             "label": "Build smartmeterreader ESP32",
             "type": "shell",
-            "command": "arduino-cli compile --optimize-for-debug --output-dir output -b esp32:esp32:XIAO_ESP32C6 .",
+            "command": "arduino-cli compile --optimize-for-debug --build-path build --output-dir output -b esp32:esp32:XIAO_ESP32C6 .",
             "problemMatcher": []
         },
         {
             "label": "Upload",
             "type": "shell",
-            "command": "arduino-cli upload -p /dev/ttyACM0 --fqbn esp32:esp32:XIAO_ESP32C6 .",
+            "command": "arduino-cli upload -p /dev/ttyACM0 --build-path build --fqbn esp32:esp32:XIAO_ESP32C6 .",
             "problemMatcher": []
         },
         {
-            "label": "Upload (alt)",
+            "label": "Monitor",
             "type": "shell",
-            "command": "arduino-cli upload -p /dev/ttyUSB0 --fqbn arduino:avr:uno .",
+            "command": "arduino-cli monitor -p /dev/ttyACM0 --config 115200",
             "problemMatcher": []
         }
     ]
