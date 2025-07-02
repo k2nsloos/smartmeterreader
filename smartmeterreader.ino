@@ -4,12 +4,13 @@
 #include "SmartMeter.h"
 #include "util.h"
 
+static size_t read_serial(void*, uint8_t* buf, size_t length);
 
 static int s_frame_id = 0;
 static Hmi s_hmi(LED_BUILTIN);
+static HardwareSerial s_uart(0);
 static ConnectionManager s_network;
 static SmartMeter s_meter(read_serial, nullptr);
-static HardwareSerial s_uart(0);
 
 
 static size_t read_serial(void*, uint8_t* buf, size_t length)
@@ -63,7 +64,8 @@ void setup()
     s_meter.set_frame_callback(on_smart_meter_frame, nullptr);
 
     Serial.begin(115200);
-    s_uart.begin(115200);
+    s_uart.begin(115200, SERIAL_8N1, D7, D6, true);
+    //Serial1.begin(115200, SERIAL_8N1, D7, D6);
     s_hmi.begin();
     s_meter.begin();
     s_network.begin();
