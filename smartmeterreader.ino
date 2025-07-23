@@ -36,6 +36,7 @@ static void on_smart_meter_frame(void* ctx, const sm_values_s* values)
 
     char json[256];
     const char* tpl = "{\n" \
+                      "  \"Device\": \"%s\"\n" \
                       "  \"SequenceNo\": %d,\n" \
                       "  \"PowerW\": [%d, %d, %d],\n" \
                       "  \"EnergyWh\": [%lld, %lld],\n" \
@@ -43,7 +44,8 @@ static void on_smart_meter_frame(void* ctx, const sm_values_s* values)
                       "}";
 
     snprintf(json, sizeof(json), tpl,
-             s_frame_id,
+             s_meter.name(),
+             s_frame_id, 
              (int)values->power_w[0], (int)values->power_w[1], (int)values->power_w[2], 
              (long long)values->import_wh, (long long)values->export_wh,
              values->timestamp.year,

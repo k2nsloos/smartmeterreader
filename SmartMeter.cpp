@@ -87,3 +87,8 @@ void SmartMeter::handle_smart_meter_frame(void *arg, const sm_values_s* values)
     s->set_connected(true);
     s->emit_frame(values);
 }
+
+const char* SmartMeter::name() const
+{
+    return sm_parser_get_model(&_parser);
+}

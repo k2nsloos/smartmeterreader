@@ -30,6 +30,7 @@ class SmartMeter
     void begin();
     void loop();
 
+    const char* name() const;
     const sm_values_s* values() const;
 
     private:
