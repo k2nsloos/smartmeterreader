@@ -32,6 +32,8 @@ typedef struct {
 typedef struct {
     sm_datetime_s timestamp;
     int32_t power_w[3];
+    int32_t potential_mv[3];
+    int32_t current_ma[3];
     int64_t import_wh;
     int64_t export_wh;
 } sm_values_s;

@@ -24,6 +24,9 @@ static const sm_state_action_f s_state_action_table[] = {
 };
 
 static bool handle_timestamp(sm_parser_t* t, uint8_t phase, size_t value_idx, const char* value);
+static bool handle_potential(sm_parser_t* t, uint8_t phase, size_t value_idx, const char* value);
+static bool handle_frequency(sm_parser_t* t, uint8_t phase, size_t value_idx, const char* value);
+static bool handle_current(sm_parser_t* t, uint8_t phase, size_t value_idx, const char* value);
 static bool handle_power_import(sm_parser_t* t, uint8_t phase, size_t value_idx, const char* value);
 static bool handle_power_export(sm_parser_t* t, uint8_t phase, size_t value_idx, const char* value);
 static bool handle_energy_export(sm_parser_t* t, uint8_t phase, size_t value_idx, const char* value);
@@ -43,6 +46,12 @@ static const sm_parser_entry_s s_ibis_keys_parsers[] = {
     { "1-0:42.7.0", handle_power_export, 2 },
     { "1-0:61.7.0", handle_power_import, 3 },
     { "1-0:62.7.0", handle_power_export, 3 },
+    { "1-0:32.7.0", handle_potential, 0 },
+    { "1-0:52.7.0", handle_potential, 1 },
+    { "1-0:72.7.0", handle_potential, 2 },
+    { "1-0:31.7.0", handle_current, 0 },
+    { "1-0:51.7.0", handle_current, 1 },
+    { "1-0:71.7.0", handle_current, 2 },
 };
 
 static void push_ch(sm_tokenizer_t* t, char ch)
@@ -106,6 +115,7 @@ static sm_token_e handle_parse_frame_header(sm_tokenizer_t* t, char ch)
 
     default:
         push_ch(t, ch);
+        if (ch == '\\') push_ch(t, ch);
         break;
     }
 
@@ -304,6 +314,24 @@ static bool parse_power(const char* value, int32_t *out_power)
     return is_w || is_kw;
 }
 
+static bool parse_potential(const char* value, int32_t *out_potential)
+{
+    const char* cur = value;
+    int64_t potential = parse_flt(&cur, 1);
+    bool is_v = str_is_substring(cur, "*V");
+    if (is_v) *out_potential = potential * 100;
+    return is_v;
+}
+
+static bool parse_current(const char* value, int32_t *out_current)
+{
+    const char* cur = value;
+    int64_t current = parse_flt(&cur, 0);
+    bool is_a = str_is_substring(cur, "*A");
+    if (is_a) *out_current = current * 1000;
+    return is_a;
+}
+
 static bool handle_timestamp(sm_parser_t* p, uint8_t phase, size_t value_idx, const char* value)
 {
     uint8_t year;
@@ -321,6 +349,24 @@ static bool handle_timestamp(sm_parser_t* p, uint8_t phase, size_t value_idx, co
     p->timestamp.day_offset = (uint32_t)p->timestamp.sec
                                     + SECONDS_PER_MINUTE * p->timestamp.min
                                     + SECONDS_PER_HOUR * p->timestamp.hour;
+    return true;
+}
+
+static bool handle_potential(sm_parser_t* p, uint8_t phase, size_t value_idx, const char* value)
+{
+    int32_t potential = 0;
+    if (value_idx != 0) return false;
+    if (!parse_potential(value, &potential)) return false;
+    p->potential_mv[phase] = potential;
+    return true;
+}
+
+static bool handle_current(sm_parser_t* p, uint8_t phase, size_t value_idx, const char* value)
+{
+    int32_t current = 0;
+    if (value_idx != 0) return false;
+    if (!parse_current(value, &current)) return false;
+    p->current_ma[phase] = current;
     return true;
 }
 
@@ -365,6 +411,8 @@ static bool handle_energy_export(sm_parser_t* p, uint8_t phase, size_t value_idx
 static void handle_frame_start(sm_parser_t* p)
 {
     memset(p->power, 0, sizeof(p->power));
+    memset(p->current_ma, 0, sizeof(p->current_ma));
+    memset(p->potential_mv, 0, sizeof(p->potential_mv));
     p->import_wh = 0;
     p->export_wh = 0;
     p->is_lx_power_present = false;
@@ -375,6 +423,8 @@ static void handle_frame_end(sm_parser_t* p)
 {
     if (!p->is_lx_power_present) p->power[1] = p->power[0];
     memcpy(p->last_frame.power_w, &p->power[1], sizeof(p->last_frame.power_w));
+    memcpy(p->last_frame.current_ma, &p->current_ma[0], sizeof(p->last_frame.current_ma));
+    memcpy(p->last_frame.potential_mv, &p->potential_mv[0], sizeof(p->last_frame.potential_mv));
     p->last_frame.timestamp = p->timestamp;
     p->last_frame.import_wh = p->import_wh;
     p->last_frame.export_wh = p->export_wh;

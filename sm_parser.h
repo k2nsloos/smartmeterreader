@@ -60,6 +60,8 @@ struct sm_parser_ {
     char model[SMART_METER_TOKENIZER_BUF_SIZE];
     sm_datetime_s timestamp;
     int32_t power[4];
+    int32_t potential_mv[3];
+    int32_t current_ma[3];
     int64_t import_wh;
     int64_t export_wh;
     bool is_lx_power_present : 1;
