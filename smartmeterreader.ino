@@ -11,7 +11,7 @@ static Hmi s_hmi(LED_BUILTIN);
 static HardwareSerial s_uart(0);
 static ConnectionManager s_network;
 static SmartMeter s_meter(read_serial, nullptr);
-
+static bool s_start_network = false;
 
 static size_t read_serial(void*, uint8_t* buf, size_t length)
 {
@@ -69,19 +69,31 @@ void setup()
     s_meter.set_connected_callback(on_meter_connected, nullptr);
     s_meter.set_frame_callback(on_smart_meter_frame, nullptr);
 
+    #if ENABLE_DEBUG
     Serial.begin(115200);
+    #endif
+
     s_uart.begin(115200, SERIAL_8N1, D7, D6, true);
     //Serial1.begin(115200, SERIAL_8N1, D7, D6);
     s_hmi.begin();
     s_meter.begin();
-    s_network.begin();
+    //s_network.begin();
 }
 
 void loop()
 {
+    if (s_start_network)
+    {
+        s_network.loop();
+    }
+    else if (millis() > 1000)
+    {
+        s_network.begin();
+        s_start_network = true;
+    }
+    
     s_hmi.loop();
     s_meter.loop();
-    s_network.loop();
-    delay(1);
+    delay(5);
 }
 

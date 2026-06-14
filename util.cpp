@@ -1,4 +1,5 @@
 #include "util.h"
+#include "Config.h"
 #include <Arduino.h>
 #include <stdarg.h>
 
@@ -102,6 +103,7 @@ static void vlog(const char* tpl_p, va_list ap)
 
 void log(const __FlashStringHelper* tpl_p, ...)
 {
+    if (!ENABLE_DEBUG) return;
     va_list ap;
     va_start(ap, tpl_p);
     vlog((const char*)tpl_p, ap);
@@ -111,6 +113,7 @@ void log(const __FlashStringHelper* tpl_p, ...)
 
 void log(const char* tpl_p, ...)
 {
+    if (!ENABLE_DEBUG) return;
     va_list ap;
     va_start(ap, tpl_p);
     vlog((const char*)tpl_p, ap);
