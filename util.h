@@ -20,5 +20,9 @@ uint8_t concat_str(char** buf, const char* end, const char* str_p);
 uint8_t print_number(char **buf, const char* end, int16_t value, uint8_t prec);
 void log(const __FlashStringHelper* tpl, ...);
 void log(const char* tpl, ...);
+void log_buf(const uint8_t* buf, size_t length);
+
+struct sm_values_;
+void log_meter_values(const char* module, const sm_values_* v);
 
 #endif // INCLUDED_UTIL_H_

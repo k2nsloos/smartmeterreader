@@ -6,11 +6,13 @@
 const int Hmi::s_blink_count[] = {
     [NO_WIFI_CONNECTION] = 1,
     [NO_SM_CONNECTION] = 2,
+    [NO_CHARGER_CONNECTION] = 3,
 };
 
 const char* const Hmi::s_error_names[] = {
     [NO_WIFI_CONNECTION] = "wifi disconnected",
-    [NO_SM_CONNECTION] = "smartmeter disconnected"
+    [NO_SM_CONNECTION] = "smartmeter disconnected",
+    [NO_CHARGER_CONNECTION] = "ev charger disconnected",
 };
 
 const char* const Hmi::s_state_names[] = {

@@ -7,6 +7,7 @@ enum hmi_error_e
 {
     NO_WIFI_CONNECTION,
     NO_SM_CONNECTION,
+    NO_CHARGER_CONNECTION,
     NUMBER_OF_ERRORS
 };
 

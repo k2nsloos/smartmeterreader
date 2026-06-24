@@ -11,6 +11,8 @@ ConnectionManager::ConnectionManager()
 void ConnectionManager::begin()
 {   
     WiFi.mode(WIFI_STA);
+    WiFi.setSleep(true);
+    WiFi.setTxPower(WIFI_POWER_8_5dBm);
     WiFi.setAutoReconnect(true);
     WiFi.begin(g_target_ssid, g_target_key);
 }

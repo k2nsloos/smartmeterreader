@@ -29,7 +29,7 @@ typedef struct {
     bool is_dst;
 } sm_datetime_s;
 
-typedef struct {
+typedef struct sm_values_ {
     sm_datetime_s timestamp;
     int32_t power_w[3];
     int32_t potential_mv[3];

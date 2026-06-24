@@ -120,3 +120,34 @@ void log(const char* tpl_p, ...)
     va_end(ap);
 }
 
+
+static char to_hex(uint8_t nibble) {
+    return nibble < 10 ? '0' + nibble : 'A' + nibble - 10;
+}
+
+void log_buf(const uint8_t* buf, size_t length)
+{
+    char tmp[301];
+    size_t w_idx = 0;
+    size_t r_idx = 0;
+
+    while (w_idx < 300 && r_idx < length) {
+        tmp[w_idx++] = to_hex(buf[r_idx] >> 4);
+        tmp[w_idx++] = to_hex(buf[r_idx++] & 0x0F);
+        tmp[w_idx++] = ' ';
+    }
+
+    tmp[w_idx] = 0;
+    log("modbus: count: %d frame: %s", length, tmp);
+}
+
+#include "sm_common.h"
+
+void log_meter_values(const char* module, const sm_values_* v)
+{
+    log("%s: received frame:", module);
+    log("  power:     %ld %ld %ld (W)", (long)v->power_w[0], (long)v->power_w[1], (long)v->power_w[2]);
+    log("  current:   %ld %ld %ld (mA)", (long)v->current_ma[0], (long)v->current_ma[1], (long)v->current_ma[2]);
+    log("  potential: %ld %ld %ld (mV)", (long)v->potential_mv[0], (long)v->potential_mv[1], (long)v->potential_mv[2]);
+    log("  energy:    %ld %ld (Wh)", (long)v->import_wh, (long)v->export_wh);
+}

@@ -3,6 +3,9 @@
 #include "ConnectionManager.h"
 #include "SmartMeter.h"
 #include "util.h"
+#include "ModbusTcpClient.h"
+#include "ChargeController.h"
+#include "Config.h"
 
 static size_t read_serial(void*, uint8_t* buf, size_t length);
 
@@ -11,7 +14,10 @@ static Hmi s_hmi(LED_BUILTIN);
 static HardwareSerial s_uart(0);
 static ConnectionManager s_network;
 static SmartMeter s_meter(read_serial, nullptr);
+static ModbusTcpClient s_charger_modbus(g_charger_ip, g_charger_port);
+static ChargeController s_ev_charger(s_charger_modbus, g_fuse_limit_ma);
 static bool s_start_network = false;
+static unsigned long s_start_time = 0;
 
 static size_t read_serial(void*, uint8_t* buf, size_t length)
 {
@@ -28,6 +34,12 @@ static void on_meter_connected(void* ctx, bool is_connected)
 {
     (void)ctx;
     s_hmi.set_error(NO_SM_CONNECTION, !is_connected);
+}
+
+static void on_ev_charger_connected(void* ctx, bool is_connected) 
+{
+    (void)ctx;
+    s_hmi.set_error(NO_CHARGER_CONNECTION, !is_connected);
 }
 
 static void on_smart_meter_frame(void* ctx, const sm_values_s* values)
@@ -59,14 +71,18 @@ static void on_smart_meter_frame(void* ctx, const sm_values_s* values)
              values->timestamp.min,
              values->timestamp.sec);
 
-    log("app: frame: %s", json);
+    log_meter_values("app", values);
     s_network.broadcast(json);
+    s_ev_charger.on_smart_meter_frame(values);
 }
 
 void setup()
 {
+    //setCpuFrequencyMhz(80);
+
     s_network.set_connected_handler(on_wifi_connected, nullptr);
     s_meter.set_connected_callback(on_meter_connected, nullptr);
+    s_ev_charger.set_connected_callback(on_ev_charger_connected, nullptr);
     s_meter.set_frame_callback(on_smart_meter_frame, nullptr);
 
     #if ENABLE_DEBUG
@@ -78,22 +94,27 @@ void setup()
     s_hmi.begin();
     s_meter.begin();
     //s_network.begin();
+    s_charger_modbus.begin();
+    s_ev_charger.begin();
+
+    s_start_time = millis();
 }
 
 void loop()
 {
-    if (s_start_network)
-    {
+    if (s_start_network) {
         s_network.loop();
     }
-    else if (millis() > 1000)
-    {
+    else if (millis() - s_start_time > 1000) {
         s_network.begin();
         s_start_network = true;
     }
     
     s_hmi.loop();
     s_meter.loop();
+    s_charger_modbus.loop();
+    s_ev_charger.loop();
+
     delay(5);
 }
 
