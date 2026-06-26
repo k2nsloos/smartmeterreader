@@ -58,6 +58,8 @@ ChargeController::ChargeController(ModbusTcpClient& client, uint32_t fuse_limit_
         .unit_id = 1,
         .is_write_request = true
     };
+
+    _limit_ma = -1;
 }
 
 void ChargeController::begin()
@@ -138,7 +140,7 @@ void ChargeController::set_is_connected(bool is_connected)
 {
     if (is_connected == _is_connected) return;
 
-    log("charger: %s", is_connected ? "connected" : "disconnected");
+    log(LOG_INFO, "charger: %s", is_connected ? "connected" : "disconnected");
     _is_connected = is_connected;
     if (_on_connected) _on_connected(_on_connected_arg, is_connected);
 }
@@ -151,12 +153,12 @@ void ChargeController::set_charge_limit(int32_t limit_ma)
     uint16_t limit_a = limit_ma / 1000;
     _max_charging_current_buf = swap_b16(limit_a);
 
-    log("charger: set charge limit to %d A %d mA", (int)limit_a, (int)limit_ma);
+    log(LOG_INFO, "charger: set charge limit to %d A", (int)limit_a);
 }
 
 void ChargeController::set_state(State state)
 {
-    log("charger: state changed from %s to %s", s_state_labels[_state], s_state_labels[state]);
+    log(LOG_DEBUG, "charger: state changed from %s to %s", s_state_labels[_state], s_state_labels[state]);
 
     _state = state;
     _state_entry_time = millis();
@@ -224,7 +226,7 @@ void ChargeController::handle_modbus_request_done(void *arg, const modbus_reques
                     .export_wh = 0,                    
                 };
 
-                log_meter_values("charger", &c->_charger_meter_meas);
+                log_meter_values(LOG_DEBUG, "charger", &c->_charger_meter_meas);
 
             }
             c->_is_request_done = true;
@@ -238,7 +240,7 @@ void ChargeController::handle_modbus_request_done(void *arg, const modbus_reques
             break;
 
         default:
-            log("charger: got modbus result in state %d", c->_state);
+            log(LOG_WARN, "charger: got modbus result in state %d", c->_state);
             break;
     }
 }
@@ -259,7 +261,7 @@ uint32_t ChargeController::determine_current_limit() {
         float reactive_a = sqrtf(MAX(tmp, 0));
         float charger_limit_a = fuse_limit_a - reactive_a - active_a;
 
-        log("charger: phase %d, active_ma %ld, reactive_ma %ld, charger_ma %ld, limit_ma %d", 
+        log(LOG_DEBUG, "charger: phase %d, active_ma %ld, reactive_ma %ld, charger_ma %ld, limit_ma %d", 
             idx + 1, 
             (long)(1000 * active_a), 
             (long)(1000 * reactive_a), 

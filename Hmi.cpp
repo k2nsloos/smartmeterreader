@@ -87,7 +87,7 @@ void Hmi::set_error(hmi_error_e error, bool is_error_active)
     bool was_error_active = _active_errors & mask;
     if (is_error_active == was_error_active) return;
 
-    log("hmi: %s error %s", s_error_names[error], is_error_active ? "active" : "cleared");
+    log(LOG_INFO, "hmi: %s error %s", s_error_names[error], is_error_active ? "active" : "cleared");
 
     if (is_error_active) {
         _active_errors |= mask;
@@ -95,7 +95,7 @@ void Hmi::set_error(hmi_error_e error, bool is_error_active)
         _active_errors &= ~mask;
     }
 
-    if (_active_errors == 0) log("hmi: all ok");
+    if (_active_errors == 0) log(LOG_INFO, "hmi: all ok");
 }
 
 void Hmi::set_state(State state)
@@ -125,7 +125,7 @@ void Hmi::set_state(State state)
             break;
     }
 
-    //log("hmi: entered state %s", s_state_names[state]);
+    // log(LOG_DEBUG, "hmi: entered state %s", s_state_names[state]);
 }
 
 void Hmi::set_led(bool is_on)

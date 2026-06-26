@@ -6,6 +6,13 @@
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof(A[0]))
 
+enum LogLevel
+{
+    LOG_DEBUG,
+    LOG_INFO,
+    LOG_WARN,
+    LOG_ERROR
+};
 
 typedef int16_t (*getter_f)(const void*);
 
@@ -18,11 +25,11 @@ static int16_t get_member(const void* ctx)
 
 uint8_t concat_str(char** buf, const char* end, const char* str_p);
 uint8_t print_number(char **buf, const char* end, int16_t value, uint8_t prec);
-void log(const __FlashStringHelper* tpl, ...);
-void log(const char* tpl, ...);
-void log_buf(const uint8_t* buf, size_t length);
+void log(LogLevel level, const __FlashStringHelper* tpl, ...);
+void log(LogLevel level, const char* tpl, ...);
+void log_buf(LogLevel level, const char* module, const uint8_t* buf, size_t length);
 
 struct sm_values_;
-void log_meter_values(const char* module, const sm_values_* v);
+void log_meter_values(LogLevel level, const char* module, const sm_values_* v);
 
 #endif // INCLUDED_UTIL_H_

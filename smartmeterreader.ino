@@ -71,7 +71,7 @@ static void on_smart_meter_frame(void* ctx, const sm_values_s* values)
              values->timestamp.min,
              values->timestamp.sec);
 
-    log_meter_values("app", values);
+    log_meter_values(LOG_DEBUG, "app", values);
     s_network.broadcast(json);
     s_ev_charger.on_smart_meter_frame(values);
 }
@@ -85,7 +85,7 @@ void setup()
     s_ev_charger.set_connected_callback(on_ev_charger_connected, nullptr);
     s_meter.set_frame_callback(on_smart_meter_frame, nullptr);
 
-    #if ENABLE_DEBUG
+    #if ENABLE_LOGGING
     Serial.begin(115200);
     #endif
 

@@ -31,7 +31,7 @@ void SmartMeter::loop()
         set_connected(false);
     } else {
         bool parse_ok = sm_parser_parse_str(&_parser, (char*)buf, count);
-        if (!parse_ok) log("smart_meter: detected parse error");
+        if (!parse_ok) log(LOG_WARN, "smart_meter: detected parse error");
     }
 
     check_timeout();
@@ -54,7 +54,7 @@ void SmartMeter::set_connected(bool is_connected)
     if (_is_connected == is_connected) return;
     _is_connected = is_connected;
 
-    log("smart_meter: meter %s", is_connected ? "connected" : "disconnected");
+    log(LOG_INFO, "smart_meter: meter %s", is_connected ? "connected" : "disconnected");
     if (_on_connected) _on_connected(_on_connected_arg, is_connected);
 }
 
@@ -68,7 +68,7 @@ void SmartMeter::check_timeout()
     if (!_is_connected) return;
 
     if (millis() - _last_frame_time >= 1000 * SMART_METER_TIMEOUT_SEC) {
-        log("smart_meter: timeout no valid frame received in %d sec", (int)SMART_METER_TIMEOUT_SEC);
+        log(LOG_ERROR, "smart_meter: timeout no valid frame received in %d sec", (int)SMART_METER_TIMEOUT_SEC);
         set_connected(false);
     }
 }
@@ -77,7 +77,7 @@ void SmartMeter::handle_smart_meter_frame(void *arg, const sm_values_s* values)
 {
     SmartMeter* s = (SmartMeter*)arg;
     
-    log("smart_meter: received frame, power: %ld W %ld W %ld W, energy: %ld Wh",
+    log(LOG_DEBUG, "smart_meter: received frame, power: %ld W %ld W %ld W, energy: %ld Wh",
         (long)values->power_w[0],
         (long)values->power_w[1],
         (long)values->power_w[2],

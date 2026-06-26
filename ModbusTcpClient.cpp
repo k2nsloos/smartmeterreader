@@ -67,7 +67,7 @@ size_t ModbusTcpClient::serialize_request(const modbus_request_s* req, uint32_t 
 {
     uint8_t function_code = get_function_code(req);
     if (function_code == MODBUS_FUNC_INVALID) {
-        log("modbus: no function code for req");
+        log(LOG_ERROR, "modbus: no function code for req");
         return 0;
     }
 
@@ -75,7 +75,7 @@ size_t ModbusTcpClient::serialize_request(const modbus_request_s* req, uint32_t 
     size_t pdu_size = PduHeaderSize + (payload_size ? (1 + payload_size) : 0);
     size_t packet_size = TcpHeaderSize + pdu_size;
     if (packet_size > length) {
-        log("modbus: packet to large %lu", (unsigned long)packet_size);
+        log(LOG_ERROR, "modbus: packet to large %lu", (unsigned long)packet_size);
         return 0;
     }
 
@@ -260,7 +260,7 @@ void ModbusTcpClient::loop()
 
 void ModbusTcpClient::set_state(State state)
 {
-    log("modbus: state changed from %s to %s", s_state_labels[_state], s_state_labels[state]);
+    log(LOG_DEBUG, "modbus: state changed from %s to %s", s_state_labels[_state], s_state_labels[state]);
 
     _state = state;
     _state_entry_time = millis();
@@ -325,7 +325,7 @@ int ModbusTcpClient::tcp_open(const char* ip_str, int port)
     int fd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (fd < 0) {
-        log("tcp: socket error: %d \"%s\"", fd, errno, strerror(errno));
+        log(LOG_ERROR, "tcp: socket error: %d \"%s\"", fd, errno, strerror(errno));
         return -1;
     }
 
@@ -335,7 +335,7 @@ int ModbusTcpClient::tcp_open(const char* ip_str, int port)
 
     rc = connect(fd, (struct sockaddr *)&serveraddr, sizeof(struct sockaddr_in));
     if (rc < 0 && errno != EINPROGRESS) {
-        log("tcp: error connecting on fd %d: %d \"%s\"", fd, errno, strerror(errno));
+        log(LOG_ERROR, "tcp: error connecting on fd %d: %d \"%s\"", fd, errno, strerror(errno));
         close(fd);
         return -1;
     }

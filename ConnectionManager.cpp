@@ -21,7 +21,7 @@ void ConnectionManager::loop()
 {
     wl_status_t status = WiFi.status();
     if (status != _status) {
-        log("wifi: status code %d", status);
+        log(LOG_DEBUG, "wifi: status code %d", status);
         _status = status;
     }
 
@@ -40,7 +40,7 @@ void ConnectionManager::set_connected_handler(conman_on_connected_f callback, vo
 
 void ConnectionManager::fire_callback(bool is_connected)
 {
-    log("wifi: %s", is_connected ? "connected" : "disconnected");
+    log(LOG_INFO, "wifi: %s", is_connected ? "connected" : "disconnected");
     if (_callback) _callback(_usr_ctx, is_connected);
 
     WiFiClient client();
@@ -51,5 +51,5 @@ void ConnectionManager::broadcast(const char* frame)
     if (!_is_connected) return;
 
     size_t count = _udp.broadcastTo(frame, 20000);
-    log("wifi: broadcasted frame of %d bytes", count);
+    log(LOG_DEBUG, "wifi: broadcasted frame of %d bytes", count);
 }

@@ -35,7 +35,7 @@ class ChargeController
     uint32_t _last_poll_time = 0;
     uint32_t _last_smart_meter_frame_time;
 
-    uint16_t _limit_ma;
+    int32_t _limit_ma;
     uint16_t _max_charging_current_buf = 0;
     uint16_t _charger_meter_buf[38];
     modbus_request_s _charger_meter_request;

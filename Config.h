@@ -1,8 +1,8 @@
 #ifndef INCLUDED_CONFIG_H_
 #define INCLUDED_CONFIG_H_
 
-#define ENABLE_DEBUG 1
-
+#define ENABLE_LOGGING 1
+#define LOG_LEVEL LOG_INFO
 extern const unsigned g_fuse_limit_ma;
 
 extern const char* g_charger_ip;

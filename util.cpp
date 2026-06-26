@@ -3,6 +3,22 @@
 #include <Arduino.h>
 #include <stdarg.h>
 
+static const char s_log_level_debug[] PROGMEM = "[D]";
+static const char s_log_level_info[] PROGMEM = "   ";
+static const char s_log_level_warn[] PROGMEM = "[W]";
+static const char s_log_level_error[] PROGMEM = "[E]";
+
+static const char* s_log_prefix_p[] = {
+    s_log_level_debug,
+    s_log_level_info,
+    s_log_level_warn,
+    s_log_level_error
+};
+
+static char to_hex(uint8_t nibble) {
+    return nibble < 10 ? '0' + nibble : 'A' + nibble - 10;
+}
+
 uint8_t concat_str(char** buf, const char* end, const char* str_p)
 {
     uint8_t max_len = end - *buf;
@@ -65,8 +81,12 @@ static void write_P(const char* begin, uint8_t max_length)
     }
 }
 
-static void vlog(const char* tpl_p, va_list ap)
+static void vlog(LogLevel level, const char* tpl_p, va_list ap)
 {
+    const char* prefix_p = (const char*)pgm_read_ptr(&s_log_prefix_p[level]);
+    write_P(prefix_p, 3);
+    Serial.print(' ');
+
     bool is_escape = false;
     const char* begin_p = (const char*)tpl_p;
 
@@ -101,32 +121,34 @@ static void vlog(const char* tpl_p, va_list ap)
 
 }
 
-void log(const __FlashStringHelper* tpl_p, ...)
+void log(LogLevel level, const __FlashStringHelper* tpl_p, ...)
 {
-    if (!ENABLE_DEBUG) return;
+    if (!ENABLE_LOGGING) return;
+    if (level < LOG_LEVEL) return;
+
     va_list ap;
     va_start(ap, tpl_p);
-    vlog((const char*)tpl_p, ap);
+    vlog(level, (const char*)tpl_p, ap);
     va_end(ap);
 }
 
 
-void log(const char* tpl_p, ...)
+void log(LogLevel level, const char* tpl_p, ...)
 {
-    if (!ENABLE_DEBUG) return;
+    if (!ENABLE_LOGGING) return;
+    if (level < LOG_LEVEL) return;
+
     va_list ap;
     va_start(ap, tpl_p);
-    vlog((const char*)tpl_p, ap);
+    vlog(level, (const char*)tpl_p, ap);
     va_end(ap);
 }
 
-
-static char to_hex(uint8_t nibble) {
-    return nibble < 10 ? '0' + nibble : 'A' + nibble - 10;
-}
-
-void log_buf(const uint8_t* buf, size_t length)
+void log_buf(LogLevel level, const char* module, const uint8_t* buf, size_t length)
 {
+    if (!ENABLE_LOGGING) return;
+    if (level < LOG_LEVEL) return;
+
     char tmp[301];
     size_t w_idx = 0;
     size_t r_idx = 0;
@@ -138,16 +160,19 @@ void log_buf(const uint8_t* buf, size_t length)
     }
 
     tmp[w_idx] = 0;
-    log("modbus: count: %d frame: %s", length, tmp);
+    log(level, "%s: count: %d, frame: %s", length, tmp);
 }
 
 #include "sm_common.h"
 
-void log_meter_values(const char* module, const sm_values_* v)
+void log_meter_values(LogLevel level, const char* module, const sm_values_* v)
 {
-    log("%s: received frame:", module);
-    log("  power:     %ld %ld %ld (W)", (long)v->power_w[0], (long)v->power_w[1], (long)v->power_w[2]);
-    log("  current:   %ld %ld %ld (mA)", (long)v->current_ma[0], (long)v->current_ma[1], (long)v->current_ma[2]);
-    log("  potential: %ld %ld %ld (mV)", (long)v->potential_mv[0], (long)v->potential_mv[1], (long)v->potential_mv[2]);
-    log("  energy:    %ld %ld (Wh)", (long)v->import_wh, (long)v->export_wh);
+    if (!ENABLE_LOGGING) return;
+    if (level < LOG_LEVEL) return;
+
+    log(level, "%s: received frame:", module);
+    log(level, "  power:     %ld %ld %ld (W)", (long)v->power_w[0], (long)v->power_w[1], (long)v->power_w[2]);
+    log(level, "  current:   %ld %ld %ld (mA)", (long)v->current_ma[0], (long)v->current_ma[1], (long)v->current_ma[2]);
+    log(level, "  potential: %ld %ld %ld (mV)", (long)v->potential_mv[0], (long)v->potential_mv[1], (long)v->potential_mv[2]);
+    log(level, "  energy:    %ld %ld (Wh)", (long)v->import_wh, (long)v->export_wh);
 }
