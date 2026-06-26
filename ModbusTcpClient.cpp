@@ -201,7 +201,7 @@ void ModbusTcpClient::loop()
                 set_state(STATE_DISCONNECTED);
             } else if (rc == MODBUS_OK) {
                 set_state(STATE_CONNECTED);
-            } else if (t - _state_entry_time >= 30000) {
+            } else if (t - _state_entry_time >= 5000) {
                 set_state(STATE_DISCONNECTED);
             }
             break;
@@ -237,6 +237,9 @@ void ModbusTcpClient::loop()
                 } else {
                     set_state(STATE_READ_RESPONSE);
                 }
+            } else if (t - _state_entry_time > 1000) {
+                complete_request(MODBUS_EXCEPTION_TIMEOUT);
+                set_state(STATE_DISCONNECTED);
             }
             break;
         
@@ -257,7 +260,7 @@ void ModbusTcpClient::loop()
 
 void ModbusTcpClient::set_state(State state)
 {
-    //log("modbus: state changed from %s to %s", s_state_labels[_state], s_state_labels[state]);
+    log("modbus: state changed from %s to %s", s_state_labels[_state], s_state_labels[state]);
 
     _state = state;
     _state_entry_time = millis();
@@ -331,7 +334,6 @@ int ModbusTcpClient::tcp_open(const char* ip_str, int port)
     setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
 
     rc = connect(fd, (struct sockaddr *)&serveraddr, sizeof(struct sockaddr_in));
-    log("tcp_open: connect rc: %d", rc);
     if (rc < 0 && errno != EINPROGRESS) {
         log("tcp: error connecting on fd %d: %d \"%s\"", fd, errno, strerror(errno));
         close(fd);
