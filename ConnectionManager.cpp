@@ -46,10 +46,8 @@ void ConnectionManager::fire_callback(bool is_connected)
     WiFiClient client();
 }
 
-void ConnectionManager::broadcast(const char* frame)
+void ConnectionManager::broadcast(const char* frame, int port)
 {
     if (!_is_connected) return;
-
-    size_t count = _udp.broadcastTo(frame, 20000);
-    log(LOG_DEBUG, "wifi: broadcasted frame of %d bytes", count);
+    size_t count = _udp.broadcastTo(frame, port);
 }

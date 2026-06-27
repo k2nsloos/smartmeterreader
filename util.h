@@ -25,6 +25,7 @@ static int16_t get_member(const void* ctx)
 
 uint8_t concat_str(char** buf, const char* end, const char* str_p);
 uint8_t print_number(char **buf, const char* end, int16_t value, uint8_t prec);
+void log_set_output(Print* output);
 void log(LogLevel level, const __FlashStringHelper* tpl, ...);
 void log(LogLevel level, const char* tpl, ...);
 void log_buf(LogLevel level, const char* module, const uint8_t* buf, size_t length);

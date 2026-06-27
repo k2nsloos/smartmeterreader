@@ -72,7 +72,7 @@ class ModbusTcpClient
     int _port;
     int _fd;
 
-    uint32_t _frame_id;
+    uint16_t _frame_id;
     uint8_t _frame_buffer[272];
     size_t _frame_size;
     size_t _read_idx;

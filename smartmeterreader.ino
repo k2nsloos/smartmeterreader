@@ -5,6 +5,7 @@
 #include "util.h"
 #include "ModbusTcpClient.h"
 #include "ChargeController.h"
+#include "NetworkLog.h"
 #include "Config.h"
 
 static size_t read_serial(void*, uint8_t* buf, size_t length);
@@ -16,6 +17,7 @@ static ConnectionManager s_network;
 static SmartMeter s_meter(read_serial, nullptr);
 static ModbusTcpClient s_charger_modbus(g_charger_ip, g_charger_port);
 static ChargeController s_ev_charger(s_charger_modbus, g_fuse_limit_ma);
+static NetworkLog s_net_logger;
 static bool s_start_network = false;
 static unsigned long s_start_time = 0;
 
@@ -24,10 +26,16 @@ static size_t read_serial(void*, uint8_t* buf, size_t length)
     return s_uart.read(buf, length);
 }
 
+static void emit_log_frame(void* ctx, const char* buf, size_t length)
+{
+    s_network.broadcast(buf, 20001);
+}
+
 static void on_wifi_connected(void* ctx, bool is_connected) 
 {
     (void)ctx;
     s_hmi.set_error(NO_WIFI_CONNECTION, !is_connected);
+    s_net_logger.set_enable(is_connected);
 }
 
 static void on_meter_connected(void* ctx, bool is_connected) 
@@ -55,7 +63,7 @@ static void on_smart_meter_frame(void* ctx, const sm_values_s* values)
                       "  \"PotentialMv\": [%d, %d, %d],\n" \
                       "  \"EnergyWh\": [%lld, %lld],\n" \
                       "  \"Timestamp\": \"%04d-%02d-%02d %02d:%02d:%02d\"\n"
-                      "}";
+                      "}\n";
 
     snprintf(json, sizeof(json), tpl,
              s_meter.name(),
@@ -84,10 +92,14 @@ void setup()
     s_meter.set_connected_callback(on_meter_connected, nullptr);
     s_ev_charger.set_connected_callback(on_ev_charger_connected, nullptr);
     s_meter.set_frame_callback(on_smart_meter_frame, nullptr);
+    s_net_logger.set_frame_callback(emit_log_frame, nullptr);
 
-    #if ENABLE_LOGGING
-    Serial.begin(115200);
-    #endif
+    if(ENABLE_LOGGING == LOG_MODE_SERIAL){
+        log_set_output(&Serial);
+        Serial.begin(115200);
+    } else if(ENABLE_LOGGING == LOG_MODE_NETWORK) {
+        log_set_output(&s_net_logger);
+    }
 
     s_uart.begin(115200, SERIAL_8N1, D7, D6, true);
     //Serial1.begin(115200, SERIAL_8N1, D7, D6);
@@ -114,6 +126,7 @@ void loop()
     s_meter.loop();
     s_charger_modbus.loop();
     s_ev_charger.loop();
+    s_net_logger.loop();
 
     delay(5);
 }

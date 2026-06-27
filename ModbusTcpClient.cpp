@@ -260,6 +260,7 @@ void ModbusTcpClient::loop()
 
 void ModbusTcpClient::set_state(State state)
 {
+    LogLevel level = state == STATE_DISCONNECTED ? LOG_INFO : LOG_DEBUG;
     log(LOG_DEBUG, "modbus: state changed from %s to %s", s_state_labels[_state], s_state_labels[state]);
 
     _state = state;
@@ -283,7 +284,6 @@ void ModbusTcpClient::set_state(State state)
         case STATE_WRITE_REQUEST:
             _frame_size = serialize_request(_active_request, ++_frame_id, _frame_buffer, sizeof(_frame_buffer));
             //log_buf(_frame_buffer, _frame_size);
-            Serial.flush();
             _write_idx = _frame_size;
             _read_idx = 0;
             break;
