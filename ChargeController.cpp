@@ -84,6 +84,7 @@ void ChargeController::loop()
             if (!_is_request_done) return;
             
             if (_modbus_rc == MODBUS_OK) {
+                
                 set_state(STATE_SET_CHARGER_KEEP_ALIVE);
             } else if (_modbus_rc == MODBUS_BUSY) {
                 set_state(STATE_READ_CHARGER_METER); // try again
@@ -128,6 +129,12 @@ void ChargeController::set_connected_callback(charge_controller_connected_callba
 {
     _on_connected = on_connected;
     _on_connected_arg = arg;
+}
+
+void ChargeController::set_frame_callback(charge_controller_frame_callback_f on_frame, void* arg)
+{
+    _on_frame = on_frame;
+    _on_frame_arg = arg;
 }
 
 void ChargeController::on_smart_meter_frame(const sm_values_s* measurement)
@@ -227,7 +234,7 @@ void ChargeController::handle_modbus_request_done(void *arg, const modbus_reques
                 };
 
                 log_meter_values(LOG_DEBUG, "charger", &c->_charger_meter_meas);
-
+                if (c->_on_frame) c->_on_frame(c->_on_frame_arg, &c->_charger_meter_meas);
             }
             c->_is_request_done = true;
             c->_modbus_rc = is_success ? MODBUS_OK : MODBUS_FATAL;

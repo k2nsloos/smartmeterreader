@@ -50,11 +50,9 @@ static void on_ev_charger_connected(void* ctx, bool is_connected)
     s_hmi.set_error(NO_CHARGER_CONNECTION, !is_connected);
 }
 
-static void on_smart_meter_frame(void* ctx, const sm_values_s* values)
+static const char* format_frame(const char* device_name, int frame_id, const sm_values_s* values)
 {
-    ++s_frame_id;
-
-    char json[256];
+    static char json[256];
     const char* tpl = "{\n" \
                       "  \"Device\": \"%s\",\n" \
                       "  \"SequenceNo\": %d,\n" \
@@ -66,8 +64,8 @@ static void on_smart_meter_frame(void* ctx, const sm_values_s* values)
                       "}\n";
 
     snprintf(json, sizeof(json), tpl,
-             s_meter.name(),
-             s_frame_id, 
+             device_name,
+             frame_id, 
              (int)values->power_w[0], (int)values->power_w[1], (int)values->power_w[2], 
              (int)values->current_ma[0], (int)values->current_ma[1], (int)values->current_ma[2], 
              (int)values->potential_mv[0], (int)values->potential_mv[1], (int)values->potential_mv[2], 
@@ -79,9 +77,24 @@ static void on_smart_meter_frame(void* ctx, const sm_values_s* values)
              values->timestamp.min,
              values->timestamp.sec);
 
+    return json;
+}
+
+static void on_smart_meter_frame(void* ctx, const sm_values_s* values)
+{
+    ++s_frame_id;
+    const char* json = format_frame(s_meter.name(), s_frame_id, values);
     log_meter_values(LOG_DEBUG, "app", values);
-    s_network.broadcast(json);
+    s_network.broadcast(json, 20000);
     s_ev_charger.on_smart_meter_frame(values);
+}
+
+static void on_charger_meter_frame(void* ctx, const sm_values_s* values)
+{
+    ++s_frame_id;
+    const char* json = format_frame("Webasto Unite", s_frame_id, values);
+    log_meter_values(LOG_DEBUG, "app", values);
+    s_network.broadcast(json, 20001);
 }
 
 void setup()
@@ -90,8 +103,9 @@ void setup()
 
     s_network.set_connected_handler(on_wifi_connected, nullptr);
     s_meter.set_connected_callback(on_meter_connected, nullptr);
-    s_ev_charger.set_connected_callback(on_ev_charger_connected, nullptr);
     s_meter.set_frame_callback(on_smart_meter_frame, nullptr);
+    s_ev_charger.set_connected_callback(on_ev_charger_connected, nullptr);
+    s_ev_charger.set_frame_callback(on_charger_meter_frame, nullptr);
     s_net_logger.set_frame_callback(emit_log_frame, nullptr);
 
     if(ENABLE_LOGGING == LOG_MODE_SERIAL){

@@ -5,6 +5,7 @@
 #include "ModbusTcpClient.h"
 
 typedef void (*charge_controller_connected_callback_f)(void*, bool);
+typedef void (*charge_controller_frame_callback_f)(void*, const sm_values_s*);
 
 class ChargeController
 {
@@ -27,6 +28,9 @@ class ChargeController
 
     charge_controller_connected_callback_f _on_connected = NULL;
     void *_on_connected_arg;
+
+    charge_controller_frame_callback_f _on_frame = NULL;
+    void *_on_frame_arg;
     
     sm_values_s _smart_meter_meas;
     sm_values_s _charger_meter_meas;
@@ -49,6 +53,7 @@ class ChargeController
         void loop();
 
         void set_connected_callback(charge_controller_connected_callback_f on_connected, void* arg);
+        void set_frame_callback(charge_controller_frame_callback_f on_frame, void* arg);
         void on_smart_meter_frame(const sm_values_s* measurement);
 
     private:
