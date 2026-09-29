@@ -32,14 +32,26 @@ dbus.mainloop.glib.threads_init()
 dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 mainloop = GLib.MainLoop()
 
-port = 20000
-if len(sys.argv) > 1:
-    port = int(sys.argv[1])
+ports = []
 
-s = fabricate_socket(port)
-io_channel = GLib.IOChannel.unix_new(s.fileno())
-id = GLib.io_add_watch(io_channel, GLib.IOCondition.IN, handle_data_received, s)
-#GLib.source_remove(id)
-#mainloop.io_add_watch(io_channel)
+for arg in sys.argv[1:]:
+    try:
+        port = int(arg)
+        ports.append(port)
+    except ValueError:
+        print(f"Ignoring invalid port number: {arg}")
+        continue
+
+if not ports:
+    ports = [20000]
+
+def setup_udp_listener(port):
+    s = fabricate_socket(port)
+    io_channel = GLib.IOChannel.unix_new(s.fileno())
+    id = GLib.io_add_watch(io_channel, GLib.IOCondition.IN, handle_data_received, s)
+    return id
+
+for port in ports:
+    setup_udp_listener(port)
 
 mainloop.run()
